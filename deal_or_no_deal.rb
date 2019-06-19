@@ -39,12 +39,72 @@ class DealOrNoDeal
     # Now remove User's case from the this game's active cases while simultaneously capturing its value
     @user_case_value = remove_user_case_from_active_cases
 
-    play_round(6)
+    # Create a container to hold cases as they are eliminated from play
+    @expunged_cases_in_game = []
+
+    @number_of_cases_to_remove = 6
+    play_round()
 
   end
 
-  def play_round( number_of_cases_to_remove )
-    
+  def play_round
+    cases_expunged_in_this_round = @active_cases_for_this_game.pop(@number_of_cases_to_remove)
+    @expunged_cases_in_game.concat( cases_expunged_in_this_round )
+    update_number_of_cases_to_remove
+    relay_situation_to_user( cases_expunged_in_this_round )
+  end
+
+  def update_number_of_cases_to_remove
+    @number_of_cases_to_remove -= 1 unless @number_of_cases_to_remove == 1
+  end
+
+  def relay_situation_to_user( cases_expunged_in_this_round )
+    cases_still_in_play = ALL_CASE_VALUES.reject{|case_value| @expunged_cases_in_game.include?(case_value)}
+
+    @banker_offer = get_banker_offer()
+    puts "Cases Eliminated   : #{cases_expunged_in_this_round.map{|case_value| convert_cents_to_dollars(case_value)}}"
+    puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
+    puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}."
+
+    prompt_user_for_deal_or_no_deal == "y" ? took_banker_offer : check_for_end_game
+
+  end
+
+  def check_for_end_game
+    @active_cases_for_this_game.length == 1 ? end_game : play_round
+  end
+
+  def end_game
+    puts "You played until the end, turning down final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
+    puts "Your case had:               #{convert_cents_to_dollars(@user_case_value)}"
+    puts "The last remaining case had: #{convert_cents_to_dollars(@active_cases_for_this_game[0])}"
+
+  end
+
+  def took_banker_offer
+    puts "You took the banker offer of #{convert_cents_to_dollars(@banker_offer)}"
+    puts "Your case had: #{convert_cents_to_dollars(@user_case_value)}"
+  end
+
+  def prompt_user_for_deal_or_no_deal
+    valid_input = false
+
+    while !valid_input
+      puts "Take the deal? Y or N."
+      user_input = gets
+      user_input = user_input.chomp.downcase
+      valid_input = ( user_input == "y" || user_input == "n" )
+    end
+
+    user_input
+  end
+
+  def convert_cents_to_dollars(cents_value)
+    cents_value / 100.00
+  end
+
+  def get_banker_offer()
+    @active_cases_for_this_game.inject(:+) / (@active_cases_for_this_game.length / 0.30)
   end
 
   def remove_user_case_from_active_cases

@@ -33,22 +33,22 @@ class DealOrNoDeal
     # Shuffle up our cases for this game!
     @active_cases_for_this_game = ALL_CASE_VALUES.shuffle
 
-    # Get the User's case
-    user_case = prompt_user_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
+    # Get the Player's case
+    player_case = prompt_player_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
 
-    # Now remove User's case from the this game's active cases while simultaneously capturing its value
-    @user_case_value = remove_user_case_from_active_cases(user_case)
+    # Now remove Player's case from the this game's active cases while simultaneously capturing its value
+    @player_case_value = remove_player_case_from_active_cases(player_case)
 
     # Create a container to hold cases as they are eliminated from play
     @expunged_cases_in_game = []
 
     @number_of_cases_to_remove = 6
 
-    is_game_still_active?
+    continue_game
 
   end
 
-  def is_game_still_active?
+  def continue_game
     @active_cases_for_this_game.length == 1 ? end_game : play_round
   end
 
@@ -58,14 +58,14 @@ class DealOrNoDeal
     cases_expunged_in_this_round = @active_cases_for_this_game.pop(@number_of_cases_to_remove)
     @expunged_cases_in_game.concat( cases_expunged_in_this_round )
     update_number_of_cases_to_remove
-    relay_situation_to_user( cases_expunged_in_this_round )
+    relay_situation_to_player( cases_expunged_in_this_round )
   end
 
   def update_number_of_cases_to_remove
     @number_of_cases_to_remove -= 1 unless @number_of_cases_to_remove == 1
   end
 
-  def relay_situation_to_user( cases_expunged_in_this_round )
+  def relay_situation_to_player( cases_expunged_in_this_round )
     cases_still_in_play = ALL_CASE_VALUES.reject{|case_value| @expunged_cases_in_game.include?(case_value)}
 
     @banker_offer = get_banker_offer()
@@ -73,22 +73,22 @@ class DealOrNoDeal
     puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}"
 
-    user_deal_or_no_deal_reply = prompt_user_for_input("Take the deal? y or n.", ["y", "n"])
+    player_take_deal_reply = prompt_player_for_input("Take the deal? y or n.", ["y", "n"])
 
-    user_deal_or_no_deal_reply == "y" ? took_banker_offer : is_game_still_active?
+    player_take_deal_reply == "y" ? took_banker_offer : continue_game
 
   end
 
   def end_game
     puts "You played until the end, turning down final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
-    puts "Your case had:               #{convert_cents_to_dollars(@user_case_value)}"
+    puts "Your case had:               #{convert_cents_to_dollars(@player_case_value)}"
     puts "The last remaining case had: #{convert_cents_to_dollars(@active_cases_for_this_game[0])}"
 
   end
 
   def took_banker_offer
     puts "You took the banker offer of #{convert_cents_to_dollars(@banker_offer)}"
-    puts "Your case had: #{convert_cents_to_dollars(@user_case_value)}"
+    puts "Your case had: #{convert_cents_to_dollars(@player_case_value)}"
   end
 
   def convert_cents_to_dollars(cents_value)
@@ -99,7 +99,7 @@ class DealOrNoDeal
     # Still tinkering with the formula here - generally I want to offer less the more cases are still in play
 
     # Get the average case value but include the player's case in the average
-    average_active_case_value = ( @active_cases_for_this_game.inject(:+) + @user_case_value) / ( @active_cases_for_this_game.length + 1 ).to_f
+    average_active_case_value = ( @active_cases_for_this_game.inject(:+) + @player_case_value) / ( @active_cases_for_this_game.length + 1 ).to_f
 
     # Penalize the offer as a function of the number of cases in play - more cases = higher penaly, less cases = lower penalty
     # Add the player's case into the active case total to keep in step with the average above
@@ -107,11 +107,11 @@ class DealOrNoDeal
 
   end
 
-  def remove_user_case_from_active_cases(case_to_remove)
+  def remove_player_case_from_active_cases(case_to_remove)
     @active_cases_for_this_game.slice!( case_to_remove - 1 )
   end
 
-  def prompt_user_for_input(input_prompt_text, valid_input_criteria)
+  def prompt_player_for_input(input_prompt_text, valid_input_criteria)
     # valid_input_criteria must be an object that supports the include? method
     # Return value will be a string, any desired typing must be performed by the caller
 
@@ -119,12 +119,12 @@ class DealOrNoDeal
 
     while !valid_input
       puts input_prompt_text
-      user_input  = gets
-      user_input  = user_input.chomp.downcase
-      valid_input = valid_input_criteria.include?( user_input )
+      player_input  = gets
+      player_input  = player_input.chomp.downcase
+      valid_input = valid_input_criteria.include?( player_input )
     end
 
-    user_input
+    player_input
   end
 
 end

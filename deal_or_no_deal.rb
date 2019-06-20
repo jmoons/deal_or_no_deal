@@ -55,9 +55,21 @@ class DealOrNoDeal
   private
 
   def play_round
+    # Remove this round's number of cases from the game. Because we shuffled the cases, we can just 
+    # pop values off the array as in the real game on TV, the act of selecting cases to remove
+    # is a statistically random event
     cases_expunged_in_this_round = @active_cases_for_this_game.pop(@number_of_cases_to_remove)
+
+    # Keep track of all the removed cases in the game
     @expunged_cases_in_game.concat( cases_expunged_in_this_round )
+
+    # Decrement the number of cases to remove if there is a next round
     update_number_of_cases_to_remove
+
+    # Get the Banker's offer based off this round's happenings
+    @banker_offer = get_banker_offer()
+
+    # Tell the player the scoop
     relay_situation_to_player( cases_expunged_in_this_round )
   end
 
@@ -68,7 +80,6 @@ class DealOrNoDeal
   def relay_situation_to_player( cases_expunged_in_this_round )
     cases_still_in_play = ALL_CASE_VALUES.reject{|case_value| @expunged_cases_in_game.include?(case_value)}
 
-    @banker_offer = get_banker_offer()
     puts "Cases Eliminated   : #{cases_expunged_in_this_round.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}"
@@ -80,14 +91,14 @@ class DealOrNoDeal
   end
 
   def end_game
-    puts "You played until the end, turning down final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
+    puts "\nYou played until the end, turning down final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
     puts "Your case had:               #{convert_cents_to_dollars(@player_case_value)}"
     puts "The last remaining case had: #{convert_cents_to_dollars(@active_cases_for_this_game[0])}"
 
   end
 
   def took_banker_offer
-    puts "You took the banker offer of #{convert_cents_to_dollars(@banker_offer)}"
+    puts "\nYou took the banker offer of #{convert_cents_to_dollars(@banker_offer)}"
     puts "Your case had: #{convert_cents_to_dollars(@player_case_value)}"
   end
 

@@ -34,10 +34,10 @@ class DealOrNoDeal
     @active_cases_for_this_game = ALL_CASE_VALUES.shuffle
 
     # Get the User's case
-    @user_case = prompt_user_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
+    user_case = prompt_user_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
 
     # Now remove User's case from the this game's active cases while simultaneously capturing its value
-    @user_case_value = remove_user_case_from_active_cases
+    @user_case_value = remove_user_case_from_active_cases(user_case)
 
     # Create a container to hold cases as they are eliminated from play
     @expunged_cases_in_game = []
@@ -99,8 +99,8 @@ class DealOrNoDeal
     @active_cases_for_this_game.inject(:+) / (@active_cases_for_this_game.length / 0.30)
   end
 
-  def remove_user_case_from_active_cases
-    @active_cases_for_this_game.slice!( @user_case - 1 )
+  def remove_user_case_from_active_cases(case_to_remove)
+    @active_cases_for_this_game.slice!( case_to_remove - 1 )
   end
 
   def prompt_user_for_input(input_prompt_text, valid_input_criteria)

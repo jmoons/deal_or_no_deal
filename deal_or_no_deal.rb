@@ -71,7 +71,7 @@ class DealOrNoDeal
     @banker_offer = get_banker_offer()
     puts "Cases Eliminated   : #{cases_expunged_in_this_round.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
-    puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}."
+    puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}"
 
     user_deal_or_no_deal_reply = prompt_user_for_input("Take the deal? y or n.", ["y", "n"])
 
@@ -92,11 +92,19 @@ class DealOrNoDeal
   end
 
   def convert_cents_to_dollars(cents_value)
-    cents_value / 100.00
+    (cents_value / 100.00).round(2)
   end
 
-  def get_banker_offer()
-    @active_cases_for_this_game.inject(:+) / (@active_cases_for_this_game.length / 0.30)
+  def get_banker_offer
+    # Still tinkering with the formula here - generally I want to offer less the more cases are still in play
+
+    # Get the average case value but include the player's case in the average
+    average_active_case_value = ( @active_cases_for_this_game.inject(:+) + @user_case_value) / ( @active_cases_for_this_game.length + 1 ).to_f
+
+    # Penalize the offer as a function of the number of cases in play - more cases = higher penaly, less cases = lower penalty
+    # Add the player's case into the active case total to keep in step with the average above
+    banker_offer = average_active_case_value * ( 1.0 - ( (@active_cases_for_this_game.length + 1) / ALL_CASE_VALUES.length.to_f) )
+
   end
 
   def remove_user_case_from_active_cases(case_to_remove)

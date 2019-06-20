@@ -43,9 +43,16 @@ class DealOrNoDeal
     @expunged_cases_in_game = []
 
     @number_of_cases_to_remove = 6
-    play_round()
+
+    is_game_still_active?
 
   end
+
+  def is_game_still_active?
+    @active_cases_for_this_game.length == 1 ? end_game : play_round
+  end
+
+  private
 
   def play_round
     cases_expunged_in_this_round = @active_cases_for_this_game.pop(@number_of_cases_to_remove)
@@ -68,12 +75,8 @@ class DealOrNoDeal
 
     user_deal_or_no_deal_reply = prompt_user_for_input("Take the deal? y or n.", ["y", "n"])
 
-    user_deal_or_no_deal_reply == "y" ? took_banker_offer : check_for_end_game
+    user_deal_or_no_deal_reply == "y" ? took_banker_offer : is_game_still_active?
 
-  end
-
-  def check_for_end_game
-    @active_cases_for_this_game.length == 1 ? end_game : play_round
   end
 
   def end_game

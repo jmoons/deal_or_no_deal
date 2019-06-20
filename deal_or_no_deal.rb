@@ -34,7 +34,7 @@ class DealOrNoDeal
     @active_cases_for_this_game = ALL_CASE_VALUES.shuffle
 
     # Get the User's case
-    @user_case = prompt_user_for_case
+    @user_case = prompt_user_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
 
     # Now remove User's case from the this game's active cases while simultaneously capturing its value
     @user_case_value = remove_user_case_from_active_cases
@@ -66,7 +66,9 @@ class DealOrNoDeal
     puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Banker Offers: #{convert_cents_to_dollars(@banker_offer)}."
 
-    prompt_user_for_deal_or_no_deal == "y" ? took_banker_offer : check_for_end_game
+    user_deal_or_no_deal_reply = prompt_user_for_input("Take the deal? y or n.", ["y", "n"])
+
+    user_deal_or_no_deal_reply == "y" ? took_banker_offer : check_for_end_game
 
   end
 
@@ -86,19 +88,6 @@ class DealOrNoDeal
     puts "Your case had: #{convert_cents_to_dollars(@user_case_value)}"
   end
 
-  def prompt_user_for_deal_or_no_deal
-    valid_input = false
-
-    while !valid_input
-      puts "Take the deal? Y or N."
-      user_input = gets
-      user_input = user_input.chomp.downcase
-      valid_input = ( user_input == "y" || user_input == "n" )
-    end
-
-    user_input
-  end
-
   def convert_cents_to_dollars(cents_value)
     cents_value / 100.00
   end
@@ -111,16 +100,20 @@ class DealOrNoDeal
     @active_cases_for_this_game.slice!( @user_case - 1 )
   end
 
-  def prompt_user_for_case
+  def prompt_user_for_input(input_prompt_text, valid_input_criteria)
+    # valid_input_criteria must be an object that supports the include? method
+    # Return value will be a string, any desired typing must be performed by the caller
+
     valid_input = false
 
     while !valid_input
-      puts "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):"
-      user_input = gets
-      valid_input = (1..ALL_CASE_VALUES.length).include?(user_input.to_i)
+      puts input_prompt_text
+      user_input  = gets
+      user_input  = user_input.chomp.downcase
+      valid_input = valid_input_criteria.include?( user_input )
     end
 
-    user_input.to_i
+    user_input
   end
 
 end

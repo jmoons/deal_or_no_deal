@@ -1,6 +1,6 @@
 class DealOrNoDeal
 
-  ALL_CASE_VALUES = [
+  ALL_CASE_VALUES_CENTS = [
     1,
     100,
     500,
@@ -31,10 +31,10 @@ class DealOrNoDeal
 
   def initialize()
     # Shuffle up our cases for this game!
-    @active_cases_for_this_game = ALL_CASE_VALUES.shuffle
+    @active_cases_for_this_game = ALL_CASE_VALUES_CENTS.shuffle
 
     # Get the Player's case
-    player_case = prompt_player_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES.length}):", ("1"..ALL_CASE_VALUES.length.to_s) ).to_i
+    player_case = prompt_player_for_input( "Please Select Your Case (1 - #{ALL_CASE_VALUES_CENTS.length}):", ("1"..ALL_CASE_VALUES_CENTS.length.to_s) ).to_i
 
     # Now remove Player's case from the this game's active cases while simultaneously capturing its value
     @player_case_value = remove_player_case_from_active_cases(player_case)
@@ -78,7 +78,7 @@ class DealOrNoDeal
   end
 
   def relay_situation_to_player( cases_expunged_in_this_round )
-    cases_still_in_play = ALL_CASE_VALUES.reject{|case_value| @expunged_cases_in_game.include?(case_value)}
+    cases_still_in_play = ALL_CASE_VALUES_CENTS.reject{|case_value| @expunged_cases_in_game.include?(case_value)}
 
     puts "Cases Eliminated   : #{cases_expunged_in_this_round.map{|case_value| convert_cents_to_dollars(case_value)}}"
     puts "Cases Still In Play: #{cases_still_in_play.map{|case_value| convert_cents_to_dollars(case_value)}}"
@@ -91,15 +91,16 @@ class DealOrNoDeal
   end
 
   def end_game
-    puts "\nYou played until the end, turning down final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
-    puts "Your case had:               #{convert_cents_to_dollars(@player_case_value)}"
+    puts "\nYou played until the end!"
+    puts "You turned down the final banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
+    puts "\nYour case had:               #{convert_cents_to_dollars(@player_case_value)}"
     puts "The last remaining case had: #{convert_cents_to_dollars(@active_cases_for_this_game[0])}"
 
   end
 
   def took_banker_offer
-    puts "\nYou took the banker offer of #{convert_cents_to_dollars(@banker_offer)}"
-    puts "Your case had: #{convert_cents_to_dollars(@player_case_value)}"
+    puts "\nYou took the banker offer of: #{convert_cents_to_dollars(@banker_offer)}"
+    puts "Your case had:                #{convert_cents_to_dollars(@player_case_value)}"
   end
 
   def convert_cents_to_dollars(cents_value)
@@ -114,7 +115,7 @@ class DealOrNoDeal
 
     # Penalize the offer as a function of the number of cases in play - more cases = higher penaly, less cases = lower penalty
     # Add the player's case into the active case total to keep in step with the average above
-    banker_offer = average_active_case_value * ( 1.0 - ( (@active_cases_for_this_game.length + 1) / ALL_CASE_VALUES.length.to_f) )
+    banker_offer = average_active_case_value * ( 1.0 - ( (@active_cases_for_this_game.length + 1) / ALL_CASE_VALUES_CENTS.length.to_f) )
 
   end
 
